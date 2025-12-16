@@ -1,0 +1,10 @@
+pandas
+matplotlib
+seaborn
+prophet
+scikit-learn
+tensorflow
+fastapi
+uvicorn
+streamlit
+plotly

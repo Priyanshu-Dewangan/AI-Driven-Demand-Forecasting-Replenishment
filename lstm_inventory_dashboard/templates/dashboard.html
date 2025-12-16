@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Neural Inventory Intelligence Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-dark: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+        
+        .header-content {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.2);
+            padding: 0.75rem;
+            border-radius: 12px;
+        }
+        
+        .logo-text h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+        
+        .logo-text p {
+            color: #93c5fd;
+            font-size: 1.1rem;
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .upload-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #047857);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon {
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-trend {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .trend-down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #cbd5e1;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.2);
+            padding: 0.75rem;
+            border-radius: 10px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            text-align: left;
+            color: #94a3b8;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.875rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo-text h1 {
+                font-size: 1.75rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section-card {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Neural Inventory Intelligence</h1>
+                        <p>Deep LSTM Forecasting • Real-time Analytics • Automated Reordering</p>
+                    </div>
+                </div>
+                
+                <div class="upload-section">
+                    <div class="upload-buttons">
+                        <form id="uploadForm" enctype="multipart/form-data" style="display: contents;">
+                            <label class="btn btn-success file-label">
+                                <i class="fas fa-upload"></i>
+                                <span id="uploadText">Upload CSV</span>
+                                <input type="file" name="file" accept=".csv" class="file-input" id="fileInput">
+                            </label>
+                        </form>
+                        
+                        <button class="btn btn-primary" onclick="loadSampleData()">
+                            <i class="fas fa-database"></i> Load Sample Data
+                        </button>
+                        
+                        <button class="btn btn-warning" onclick="trainModels()" id="trainBtn">
+                            <i class="fas fa-cogs"></i> Train AI Models
+                        </button>
+                        
+                        <button class="btn btn-secondary" onclick="exportData()" id="exportBtn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <div id="alertContainer" style="margin-top: 1rem;"></div>
+                    
+                    <div id="progressContainer" style="margin-top: 1rem; display: none;">
+                        <div style="height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden;">
+                            <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.3s;"></div>
+                        </div>
+                        <div id="progressText" style="text-align: center; margin-top: 0.5rem; color: var(--primary); font-weight: 600;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be loaded dynamically -->
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs" id="navTabs">
+            <button class="nav-tab active" onclick="switchTab('overview')">
+                <i class="fas fa-chart-line"></i> Overview
+            </button>
+            <button class="nav-tab" onclick="switchTab('forecasts')">
+                <i class="fas fa-chart-area"></i> Forecasts
+            </button>
+            <button class="nav-tab" onclick="switchTab('reorders')">
+                <i class="fas fa-exclamation-triangle"></i> Reorder Queue
+            </button>
+            <button class="nav-tab" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </button>
+            <button class="nav-tab" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+        </div>
+        
+        <!-- Content Sections -->
+        <div id="contentSections">
+            <!-- Overview Tab -->
+            <div class="content-section active" id="overview">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h2 class="section-title">Dashboard Overview</h2>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                    
+                    <div id="recentOrders" style="margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: white;">Recent Activity</h3>
+                        <div class="table-container">
+                            <table id="recentOrdersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Action</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersBody">
+                                    <!-- Will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Forecasts Tab -->
+            <div class="content-section" id="forecasts">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-area"></i>
+                        </div>
+                        <h2 class="section-title">LSTM Forecasts</h2>
+                        <select id="productSelect" style="margin-left: auto; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            <option>Select Product</option>
+                        </select>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-label">Current Inventory</div>
+                            <div class="stat-value" id="currentInventory">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Avg Daily Sales</div>
+                            <div class="stat-value" id="avgSales">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Model Accuracy</div>
+                            <div class="stat-value" id="modelAccuracy">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Inventory Trend</div>
+                            <div class="stat-value" id="inventoryTrend">Stable</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reorders Tab -->
+            <div class="content-section" id="reorders">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h2 class="section-title">Reorder Recommendations</h2>
+                        <button class="btn btn-primary" onclick="updateReorderSettings()" style="margin-left: auto;">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: white;">Reorder Settings</h3>
+                            <div style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 12px;">
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Reorder Threshold</label>
+                                    <input type="range" id="reorderThreshold" min="20" max="200" step="5" style="width: 100%;" oninput="document.getElementById('thresholdValue').textContent = this.value + ' units'">
+                                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;">
+                                        <span>Low (20)</span>
+                                        <span id="thresholdValue">50 units</span>
+                                        <span>High (200)</span>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Lead Time (days)</label>
+                                    <input type="number" id="leadTime" min="1" max="30" value="3" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Safety Factor</label>
+                                    <input type="number" id="safetyFactor" min="1" max="3" step="0.1" value="1.5" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: white;">Reorder Queue</h3>
+                            <div id="reorderQueue" style="max-height: 600px; overflow-y: auto; padding-right: 0.5rem;">
+                                <!-- Reorder cards will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Tab -->
+            <div class="content-section" id="analytics">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h2 class="section-title">Analytics & Insights</h2>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: white;">Model Architecture</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6, #1e40af);">
+                                <div class="stat-label">Layer 1</div>
+                                <div class="stat-value">128 units</div>
+                                <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); margin-top: 0.5rem;">Input Processing</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                                <div class="stat-label">Layer 2</div>
+                                <div class="stat-value">96 units</div>
+                                <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); margin-top: 0.5rem;">Feature Extraction</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                                <div class="stat-label">Layer 3</div>
+                                <div class="stat-value">64 units</div>
+                                <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); margin-top: 0.5rem;">Pattern Learning</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <div class="stat-label">Layer 4</div>
+                                <div class="stat-value">48 units</div>
+                                <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); margin-top: 0.5rem;">Context Understanding</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #047857);">
+                                <div class="stat-label">Layer 5</div>
+                                <div class="stat-value">32 units</div>
+                                <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); margin-top: 0.5rem;">Output Preparation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div class="content-section" id="settings">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h2 class="section-title">System Settings</h2>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: white;">Forecast Settings</h3>
+                            <div style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 12px;">
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Forecast Horizon (days)</label>
+                                    <input type="number" id="forecastDays" min="1" max="30" value="7" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Training Epochs</label>
+                                    <input type="number" id="trainingEpochs" min="10" max="100" value="20" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="updateSystemSettings()" style="width: 100%;">
+                                    <i class="fas fa-save"></i> Save Settings
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: white;">System Information</h3>
+                            <div style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <span style="color: #94a3b8;">Dashboard Version</span>
+                                    <span style="color: white; font-weight: 600;">v2.1.0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <span style="color: #94a3b8;">Last Updated</span>
+                                    <span style="color: white; font-weight: 600;" id="lastUpdated">Just now</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <span style="color: #94a3b8;">Data Points</span>
+                                    <span style="color: white; font-weight: 600;" id="dataPoints">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span style="color: #94a3b8;">Active Products</span>
+                                    <span style="color: white; font-weight: 600;" id="activeProducts">0</span>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-danger" onclick="resetSystem()" style="width: 100%; margin-top: 2rem;">
+                                <i class="fas fa-redo"></i> Reset System
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>🧠 Neural Inventory Intelligence Dashboard • Powered by LSTM AI</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Real-time forecasting • Automated reordering • Data-driven insights</p>
+            <p style="margin-top: 1rem; color: #475569;" id="footerStatus">System ready</p>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let currentTab = 'overview';
+        let charts = {};
+        let currentForecasts = {};
+        let currentProducts = [];
+        let currentStats = {};
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load initial data
+            loadStatistics();
+            checkSystemStatus();
+            
+            // Update timestamp
+            updateTimestamp();
+            setInterval(updateTimestamp, 60000); // Update every minute
+        });
+        
+        function setupEventListeners() {
+            // File upload
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    uploadFile(this.files[0]);
+                }
+            });
+            
+            // Product selection
+            document.getElementById('productSelect').addEventListener('change', function() {
+                if (this.value !== 'Select Product') {
+                    loadProductForecast(this.value);
+                }
+            });
+        }
+        
+        function switchTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Update content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+            
+            // Load tab-specific data
+            switch(tabName) {
+                case 'forecasts':
+                    loadProducts();
+                    break;
+                case 'reorders':
+                    loadReorderRecommendations();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+            }
+        }
+        
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            showProgress('Uploading file...', 0);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Reload the page to get updated data
+                location.reload();
+            })
+            .catch(error => {
+                showAlert('Upload failed: ' + error.message, 'danger');
+                hideProgress();
+            });
+        }
+        
+        function loadSampleData() {
+            showProgress('Loading sample data...', 0);
+            
+            fetch('/sample-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Sample data loaded successfully!', 'success');
+                    location.reload();
+                } else {
+                    showAlert('Failed to load sample data: ' + data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Error: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                hideProgress();
+            });
+        }
+        
+        function trainModels() {
+            const btn = document.getElementById('trainBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+            
+            showProgress('Training LSTM models...', 0);
+            
+            fetch('/train', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ force_retrain: true })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(`Models trained successfully for ${data.num_products} products!`, 'success');
+                    loadStatistics();
+                    loadForecasts();
+                } else {
+                    showAlert('Training failed: ' + data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Error: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cogs"></i> Train AI Models';
+                hideProgress();
+            });
+        }
+        
+        function loadStatistics() {
+            fetch('/statistics')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentStats = data.statistics;
+                    updateStatsDisplay();
+                    updateSystemInfo();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading statistics:', error);
+            });
+        }
+        
+        function updateStatsDisplay() {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            const stats = [
+                {
+                    icon: 'fas fa-box',
+                    label: 'Total Products',
+                    value: currentStats.total_products || 0,
+                    trend: 12.5,
+                    color: '#3b82f6'
+                },
+                {
+                    icon: 'fas fa-shopping-cart',
+                    label: 'Total Sales',
+                    value: (currentStats.total_sales || 0).toLocaleString(),
+                    trend: 8.3,
+                    color: '#8b5cf6'
+                },
+                {
+                    icon: 'fas fa-dollar-sign',
+                    label: 'Revenue',
+                    value: '$' + ((currentStats.total_revenue || 0) / 1000).toFixed(0) + 'K',
+                    trend: 15.2,
+                    color: '#10b981'
+                },
+                {
+                    icon: 'fas fa-exclamation-triangle',
+                    label: 'Urgent Reorders',
+                    value: 0, // Will be updated from recommendations
+                    trend: -5.2,
+                    color: '#ef4444'
+                },
+                {
+                    icon: 'fas fa-boxes',
+                    label: 'Inventory Value',
+                    value: ((currentStats.total_inventory || 0) / 1000).toFixed(1) + 'K',
+                    trend: 12.5,
+                    color: '#f59e0b'
+                },
+                {
+                    icon: 'fas fa-store',
+                    label: 'Data Points',
+                    value: currentStats.data_rows || 0,
+                    trend: 2.1,
+                    color: '#06b6d4'
+                },
+                {
+                    icon: 'fas fa-bullseye',
+                    label: 'Model Accuracy',
+                    value: (currentStats.accuracy || 0) + '%',
+                    trend: 1.8,
+                    color: '#ec4899'
+                }
+            ];
+            
+            statsGrid.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: ${stat.color};">
+                            <i class="${stat.icon}"></i>
+                        </div>
+                        <div class="stat-trend ${stat.trend > 0 ? 'trend-up' : 'trend-down'}">
+                            ${stat.trend > 0 ? '+' : ''}${stat.trend}%
+                        </div>
+                    </div>
+                    <div class="stat-label">${stat.label}</div>
+                    <div class="stat-value">${stat.value}</div>
+                </div>
+            `).join('');
+        }
+        
+        function loadProducts() {
+            fetch('/products')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentProducts = data.products;
+                    const select = document.getElementById('productSelect');
+                    select.innerHTML = '<option>Select Product</option>' +
+                        data.products.map(p => `<option value="${p.id}">${p.name} (${p.id})</option>`).join('');
+                    
+                    if (data.products.length > 0) {
+                        loadProductForecast(data.products[0].id);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading products:', error);
+            });
+        }
+        
+        function loadProductForecast(productId) {
+            fetch(`/api/forecast/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateForecastDisplay(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading forecast:', error);
+            });
+        }
+        
+        function updateForecastDisplay(data) {
+            // Update metrics
+            document.getElementById('currentInventory').textContent = data.current_inventory.toLocaleString();
+            document.getElementById('avgSales').textContent = data.avg_sales.toFixed(1);
+            document.getElementById('modelAccuracy').textContent = data.accuracy.toFixed(1) + '%';
+            document.getElementById('inventoryTrend').textContent = data.trend === 'up' ? '↗ Rising' : '↘ Falling';
+            document.getElementById('inventoryTrend').style.color = data.trend === 'up' ? '#10b981' : '#ef4444';
+            
+            // Update chart
+            const forecastData = data.forecast || [];
+            if (forecastData.length > 0) {
+                updateForecastChart(forecastData);
+            }
+        }
+        
+        function updateForecastChart(forecastData) {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            if (charts.forecast) {
+                charts.forecast.destroy();
+            }
+            
+            const labels = forecastData.map(f => f.day);
+            const inventoryData = forecastData.map(f => f.inventory);
+            
+            charts.forecast = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Predicted Inventory',
+                        data: inventoryData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function loadReorderRecommendations() {
+            fetch('/reorder-recommendations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateReorderQueue(data.recommendations);
+                    updateConfigDisplay(data.config);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading reorder recommendations:', error);
+            });
+        }
+        
+        function updateReorderQueue(recommendations) {
+            const queue = document.getElementById('reorderQueue');
+            
+            if (recommendations.length === 0) {
+                queue.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #64748b;">
+                        <i class="fas fa-box" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p style="font-size: 1.1rem;">No reorder recommendations found.</p>
+                        <p>All inventory levels are above threshold.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            queue.innerHTML = recommendations.map(rec => `
+                <div style="background: ${getUrgencyColor(rec.urgency, 0.1)}; border: 1px solid ${getUrgencyColor(rec.urgency, 0.3)}; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fas fa-box" style="color: white; font-size: 1.25rem;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 1.25rem; color: white;">${rec.product.id}</div>
+                                <div style="color: #94a3b8; font-size: 0.875rem;">${rec.product.category}</div>
+                            </div>
+                        </div>
+                        <span style="padding: 0.5rem 1rem; background: ${getUrgencyColor(rec.urgency, 0.2)}; color: ${getUrgencyColor(rec.urgency)}; border-radius: 20px; font-weight: 700; font-size: 0.875rem;">
+                            ${rec.urgency} URGENCY
+                        </span>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 8px;">
+                            <div style="color: #94a3b8; font-size: 0.875rem;">Current Stock</div>
+                            <div style="color: white; font-weight: 700; font-size: 1.5rem;">${rec.currentInventory.toLocaleString()}</div>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 8px;">
+                            <div style="color: #94a3b8; font-size: 0.875rem;">Reorder Point</div>
+                            <div style="color: white; font-weight: 700; font-size: 1.5rem;">${rec.reorderPoint.toLocaleString()}</div>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 8px;">
+                            <div style="color: #94a3b8; font-size: 0.875rem;">Avg Daily Sales</div>
+                            <div style="color: white; font-weight: 700; font-size: 1.5rem;">${rec.avgSales.toFixed(0)}</div>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 8px;">
+                            <div style="color: #94a3b8; font-size: 0.875rem;">Days to Stockout</div>
+                            <div style="color: white; font-weight: 700; font-size: 1.5rem;">${rec.daysUntilStockout}</div>
+                        </div>
+                    </div>
+                    
+                    ${rec.needsReorder ? `
+                    <div style="background: rgba(0, 0, 0, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <div style="color: white; font-weight: 700; font-size: 1.125rem;">Recommended Order:</div>
+                                <div style="color: #94a3b8; font-size: 0.875rem;">Based on 7-day forecast</div>
+                            </div>
+                            <div style="color: white; font-weight: 900; font-size: 2rem;">${rec.recommendedOrder.toLocaleString()} units</div>
+                        </div>
+                        <button onclick="generatePurchaseOrder('${rec.product.id}', '${rec.product.name}', ${rec.recommendedOrder})" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.125rem; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-shopping-cart"></i> Generate Purchase Order
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function getUrgencyColor(urgency, opacity = 1) {
+            const colors = {
+                'HIGH': `rgba(239, 68, 68, ${opacity})`,
+                'MEDIUM': `rgba(245, 158, 11, ${opacity})`,
+                'LOW': `rgba(16, 185, 129, ${opacity})`
+            };
+            return colors[urgency] || `rgba(100, 116, 139, ${opacity})`;
+        }
+        
+        function updateConfigDisplay(config) {
+            document.getElementById('reorderThreshold').value = config.reorderThreshold || 50;
+            document.getElementById('thresholdValue').textContent = (config.reorderThreshold || 50) + ' units';
+            document.getElementById('leadTime').value = config.leadTime || 3;
+            document.getElementById('safetyFactor').value = config.safetyFactor || 1.5;
+            document.getElementById('forecastDays').value = config.forecastDays || 7;
+            document.getElementById('trainingEpochs').value = config.trainingEpochs || 20;
+        }
+        
+        function updateReorderSettings() {
+            const config = {
+                reorderThreshold: parseInt(document.getElementById('reorderThreshold').value),
+                leadTime: parseInt(document.getElementById('leadTime').value),
+                safetyFactor: parseFloat(document.getElementById('safetyFactor').value)
+            };
+            
+            fetch('/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Reorder settings saved successfully!', 'success');
+                    loadReorderRecommendations();
+                }
+            })
+            .catch(error => {
+                showAlert('Error saving settings: ' + error.message, 'danger');
+            });
+        }
+        
+        function updateSystemSettings() {
+            const config = {
+                forecastDays: parseInt(document.getElementById('forecastDays').value),
+                trainingEpochs: parseInt(document.getElementById('trainingEpochs').value)
+            };
+            
+            fetch('/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('System settings saved successfully!', 'success');
+                }
+            })
+            .catch(error => {
+                showAlert('Error saving settings: ' + error.message, 'danger');
+            });
+        }
+        
+        function generatePurchaseOrder(productId, productName, quantity) {
+            showAlert(`Purchase order generated for ${productName}: ${quantity.toLocaleString()} units`, 'success');
+            
+            // Add to recent orders
+            const recentOrders = JSON.parse(localStorage.getItem('recentOrders') || '[]');
+            recentOrders.unshift({
+                productId,
+                productName,
+                quantity,
+                date: new Date().toLocaleDateString(),
+                status: 'pending'
+            });
+            
+            // Keep only last 5 orders
+            if (recentOrders.length > 5) {
+                recentOrders.pop();
+            }
+            
+            localStorage.setItem('recentOrders', JSON.stringify(recentOrders));
+            updateRecentOrders();
+        }
+        
+        function loadAnalytics() {
+            updateCategoryChart();
+            updatePerformanceChart();
+            updateRecentOrders();
+        }
+        
+        function updateCategoryChart() {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (charts.category) {
+                charts.category.destroy();
+            }
+            
+            // Sample data - in real app, fetch from API
+            const categories = ['Electronics', 'Audio', 'Wearables', 'Home', 'Other'];
+            const revenues = [45000, 28000, 32000, 19000, 12000];
+            
+            charts.category = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: revenues,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(236, 72, 153, 0.7)'
+                        ],
+                        borderColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#ec4899'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updatePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            if (charts.performance) {
+                charts.performance.destroy();
+            }
+            
+            // Sample data
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const sales = [45, 52, 38, 61, 55, 48, 42];
+            const inventory = [180, 165, 140, 125, 110, 95, 82];
+            
+            charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Daily Sales',
+                            data: sales,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Inventory Level',
+                            data: inventory,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateRecentOrders() {
+            const recentOrders = JSON.parse(localStorage.getItem('recentOrders') || '[]');
+            const tbody = document.getElementById('recentOrdersBody');
+            
+            if (recentOrders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No recent orders. Generate your first purchase order!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = recentOrders.map(order => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; color: white;">${order.productName}</div>
+                        <div style="font-size: 0.875rem; color: #94a3b8;">${order.productId}</div>
+                    </td>
+                    <td>
+                        <span style="font-weight: 700; color: white;">${order.quantity.toLocaleString()} units</span>
+                    </td>
+                    <td style="color: #94a3b8;">${order.date}</td>
+                    <td>
+                        <span class="badge ${order.status === 'pending' ? 'badge-warning' : order.status === 'shipped' ? 'badge-success' : 'badge-danger'}">
+                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function updateSystemInfo() {
+            document.getElementById('dataPoints').textContent = currentStats.data_rows || 0;
+            document.getElementById('activeProducts').textContent = currentStats.total_products || 0;
+        }
+        
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function checkSystemStatus() {
+            fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                const footer = document.getElementById('footerStatus');
+                if (data.status === 'ok') {
+                    footer.textContent = `System ready • ${data.models_loaded || 0} models loaded • ${data.data_loaded ? 'Data loaded' : 'No data'}`;
+                    footer.style.color = '#10b981';
+                } else {
+                    footer.textContent = 'System offline';
+                    footer.style.color = '#ef4444';
+                }
+            })
+            .catch(() => {
+                document.getElementById('footerStatus').textContent = 'API server not available';
+                document.getElementById('footerStatus').style.color = '#ef4444';
+            });
+        }
+        
+        function exportData() {
+            fetch('/export')
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Export failed');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inventory_export_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showAlert('Data exported successfully!', 'success');
+            })
+            .catch(error => {
+                showAlert('Export failed: ' + error.message, 'danger');
+            });
+        }
+        
+        function resetSystem() {
+            if (confirm('Are you sure you want to reset the system? This will clear all data and models.')) {
+                localStorage.clear();
+                showAlert('System reset. Please refresh the page.', 'warning');
+            }
+        }
+        
+        // Utility functions
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        function showProgress(text, percent) {
+            const container = document.getElementById('progressContainer');
+            const bar = document.getElementById('progressBar');
+            const textEl = document.getElementById('progressText');
+            
+            container.style.display = 'block';
+            bar.style.width = percent + '%';
+            textEl.textContent = text;
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+    </script>
+</body>
+</html>

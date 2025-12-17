@@ -1,9 +1,10 @@
-# 🛒 AI-Driven Automated Supply Planning System (Walmart)
+# 🛒 AI-Driven Automated Supply Planning System 
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-LSTM-orange)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
+![Flask](https://img.shields.io/badge/Flask-Dashboard-yellow)
 
 
 ## 📖 Overview
